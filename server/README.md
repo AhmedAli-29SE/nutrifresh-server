@@ -1,73 +1,128 @@
-# NutriFresh API Server
+NutriFresh API Server
 
-FastAPI server with PostgreSQL database, ML models for food detection, and nutrition tracking.
+Backend server for an AI based food freshness and nutrition detection system.
+Built using FastAPI, PostgreSQL, and deep learning models to analyze food images and track nutritional intake.
 
-## Quick Start
+This repository contains only the backend (server) code developed as part of the Final Year Project.
 
-```bash
-# Install dependencies
+Tech Stack
+
+Python (FastAPI)
+
+PostgreSQL
+
+Deep Learning (CNN based image models)
+
+JWT Authentication
+
+USDA FoodData Central API
+
+Groq API for AI powered insights
+
+Project Features
+
+User authentication (signup, login)
+
+Food image analysis for freshness and type detection
+
+Nutrition calculation and scaling based on portion size
+
+Meal logging and history tracking
+
+Daily nutrition aggregates
+
+AI generated health insights
+
+RESTful API design
+
+Quick Start
+1. Install dependencies
 pip install -r requirements.txt
 
-# Configure database
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials
+2. Database setup
 
-# Run migrations (first time setup)
+Create a PostgreSQL database manually (for example nutrifresh), then run:
+
 psql -U postgres -d nutrifresh -f schema.sql
-psql -U postgres -d nutrifresh -f migrations/001_add_meal_tracking.sql
 
-# Start server
+3. Environment variables
+
+Create a .env file in the server root and add:
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=nutrifresh
+DB_USER=postgres
+DB_PASSWORD=your_password
+
+GROQ_API_KEY=your_groq_api_key
+USDA_API_KEY=your_usda_api_key
+
+4. Run the server
 python main.py
-```
 
-## API Endpoints
 
-### Authentication
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/signup` | POST | Register new user |
-| `/api/auth/login` | POST | Login and get JWT token |
+The API will start on the configured host and port.
 
-### Food Analysis
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/analyze-food` | POST | Analyze food image (multipart) |
-| `/api/session/{id}` | GET | Get scan session by ID |
+ML Models
 
-### Meals & Nutrition
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/scan/{id}/add-to-meal` | POST | Add scan to meal with nutrient scaling |
-| `/api/user/meals` | GET | Get meal history |
-| `/api/user/meals` | POST | Log meal manually |
-| `/api/user/meals/{id}` | DELETE | Delete meal |
-| `/api/user/daily-aggregates` | GET | Get daily nutrition totals |
-| `/api/user/meals/today-summary` | GET | Get today's meal summary |
+Due to GitHub file size limits, trained machine learning model files are not included in this repository.
 
-### User Data
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/user/profile` | GET/POST | Get/update health profile |
-| `/api/user/history` | GET | Get scan history |
-| `/api/user/saved` | GET/POST | Favorites management |
-| `/api/user/ai-insights` | GET | AI-generated health insights |
+Required models:
 
-## Add to Meal API
+Food freshness detection model (.h5)
 
-```bash
+Fruit detection model (.bin or .safetensors)
+
+To enable inference locally:
+
+Download the trained models from the provided external source (Google Drive or similar)
+
+Place them inside:
+
+server/models/models/
+
+
+Ensure the filenames match those expected in the code
+
+The exclusion of model files is intentional and does not affect backend code evaluation.
+
+API Endpoints
+Authentication
+Endpoint	Method	Description
+/api/auth/signup	POST	Register a new user
+/api/auth/login	POST	Login and receive JWT token
+Food Analysis
+Endpoint	Method	Description
+/api/analyze-food	POST	Analyze uploaded food image
+/api/session/{id}	GET	Retrieve scan session details
+Meals and Nutrition
+Endpoint	Method	Description
+/api/scan/{id}/add-to-meal	POST	Add scan result to meal
+/api/user/meals	GET	Get user meal history
+/api/user/meals	POST	Log a meal manually
+/api/user/meals/{id}	DELETE	Delete a meal
+/api/user/daily-aggregates	GET	Daily nutrition totals
+/api/user/meals/today-summary	GET	Today’s nutrition summary
+User Data
+Endpoint	Method	Description
+/api/user/profile	GET / POST	Get or update health profile
+/api/user/history	GET	Get food scan history
+/api/user/saved	GET / POST	Manage favorite foods
+/api/user/ai-insights	GET	AI generated health insights
+Add to Meal Example
+Request
 POST /api/scan/{session_id}/add-to-meal
-Authorization: Bearer <token>
+Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
 
 {
-  "meal_time": "breakfast",  # breakfast, lunch, dinner, snack
-  "quantity": 2,             # servings
-  "weight_grams": 150        # grams per serving
+  "meal_time": "breakfast",
+  "quantity": 2,
+  "weight_grams": 150
 }
-```
 
-**Response:**
-```json
+Response
 {
   "success": true,
   "data": {
@@ -81,50 +136,25 @@ Content-Type: application/json
     },
     "daily_totals": {
       "day_date": "2024-12-06",
-      "totals": {"calories": 1250, "protein": 45},
+      "totals": {
+        "calories": 1250,
+        "protein": 45
+      },
       "meals_count": 3
     }
   }
 }
-```
 
-## Daily Aggregates API
-
-```bash
+Daily Aggregates Example
 GET /api/user/daily-aggregates?from_date=2024-12-01&to_date=2024-12-07
-Authorization: Bearer <token>
-```
+Authorization: Bearer <JWT_TOKEN>
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "from_date": "2024-12-01",
-    "to_date": "2024-12-07",
-    "aggregates": [
-      {"day_date": "2024-12-01", "totals": {...}, "meals_count": 4},
-      {"day_date": "2024-12-02", "totals": {...}, "meals_count": 3}
-    ]
-  }
-}
-```
+Notes for Evaluation
 
-## Database Migrations
+This repository contains backend code only
 
-```bash
-# Apply all migrations
-psql -U postgres -d nutrifresh -f migrations/001_add_meal_tracking.sql
-```
+Frontend and model training are handled separately
 
-## Environment Variables
+Large model files are intentionally excluded
 
-| Variable | Description |
-|----------|-------------|
-| `DB_HOST` | PostgreSQL host |
-| `DB_PORT` | PostgreSQL port (default: 5432) |
-| `DB_NAME` | Database name |
-| `DB_USER` | Database user |
-| `DB_PASSWORD` | Database password |
-| `GROQ_API_KEY` | Groq API for AI features |
-| `USDA_API_KEY` | USDA API for nutrition data |
+Focus is on API design, data flow, and AI integration
