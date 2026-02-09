@@ -1,0 +1,31 @@
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+aiofiles>=23.2.1
+pillow>=9.0.0
+pydantic>=2.5.0
+pydantic[email]>=2.5.0
+jinja2>=3.1.2
+
+# Image/array processing
+numpy>=1.24.0
+opencv-python>=4.8.0.74
+
+# Models
+torch>=2.2.0
+transformers>=4.40.0
+# tensorflow>=2.13.0
+
+# External APIs
+requests>=2.31.0
+groq>=0.11.0
+python-dotenv>=1.0.1
+
+# Authentication & Security
+bcrypt>=4.0.1
+pyjwt>=2.8.0
+python-jose[cryptography]>=3.3.0
+
+# Database
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9

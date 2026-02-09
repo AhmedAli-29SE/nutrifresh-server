@@ -1,0 +1,364 @@
+================================================================================
+                    NUTRIFRESH SERVER - FILE DOCUMENTATION
+================================================================================
+                    FastAPI Backend for NutriFresh Application
+                    Last Updated: December 2024
+================================================================================
+
+This document describes all working files in the NutriFresh server project.
+The server is built with FastAPI and provides REST APIs for food analysis,
+user authentication, meal tracking, and AI-powered nutrition recommendations.
+
+================================================================================
+                              ROOT DIRECTORY FILES
+================================================================================
+
+main.py
+-------
+Main FastAPI application entry point. Contains:
+- Application initialization and configuration
+- CORS middleware setup
+- All API endpoint definitions
+- ML model loading and inference coordination
+- Database connection management
+- Authentication middleware and JWT token handling
+- Session management for food analysis
+- Integration with Groq AI for recommendations
+
+requirements.txt
+----------------
+Python package dependencies including:
+- fastapi, uvicorn - Web framework and server
+- asyncpg - PostgreSQL async driver
+- pyjwt - JSON Web Token handling
+- tensorflow, torch - ML model inference
+- transformers - HuggingFace model loading
+- groq - Groq AI API client
+- python-multipart - File upload handling
+- httpx - Async HTTP client for USDA API
+
+schema.sql
+----------
+PostgreSQL database schema definitions:
+- users table - User accounts and credentials
+- user_profiles - Health profiles and settings
+- sessions - Food scan results storage
+- meals - Meal logging data
+- nutrition_goals - User nutrition targets
+
+README.md
+---------
+Project overview and setup instructions.
+
+================================================================================
+                              ROUTERS DIRECTORY
+================================================================================
+Contains modular API route handlers for different functionalities.
+
+routers/__init__.py
+-------------------
+Package initialization and exports for all routers.
+
+routers/auth.py
+---------------
+Authentication endpoints:
+- POST /api/auth/login - User login with JWT token generation
+- POST /api/auth/signup - New user registration (8+ char password)
+- GET /api/auth/profile - Get user profile
+- PUT /api/auth/profile - Update user profile
+- POST /api/auth/health-profile - Setup health profile with AI-generated goals
+- POST /api/auth/change-password - Password change
+- POST /api/auth/logout - Session termination
+
+routers/food_analysis.py
+------------------------
+Food analysis processing logic:
+- Image decoding and validation
+- ML model inference coordination
+- Nutrition data fetching from USDA
+- AI recommendation generation
+- Session storage management
+- Unlogged user handling (no database save)
+
+routers/meals.py
+----------------
+Meal tracking endpoints:
+- POST /api/meals/log - Log a meal with nutrition data
+- GET /api/meals/today - Get today's meals
+- POST /api/meals/recommendations - AI meal recommendations
+- POST /api/meals/add-scan - Add scanned food to meal log
+- DELETE /api/meals/{id} - Delete a meal entry
+
+routers/summary.py
+------------------
+Dashboard and analytics endpoints:
+- GET /api/summary/daily - Daily nutrition summary with goals progress
+- GET /api/summary/weekly - Weekly trends and averages
+- GET /api/summary/insights - AI-generated health insights
+- GET /api/dashboard - Combined dashboard data
+
+routers/saved.py
+----------------
+Saved items management:
+- GET /api/saved/history - Scan history with pagination
+- GET /api/saved/favorites - Favorite items
+- GET /api/saved/{id} - Specific scan details
+- POST /api/saved/save - Save a scan to collection
+- PATCH /api/saved/{id} - Update saved item
+- DELETE /api/saved/{id} - Delete saved item
+
+routers/users.py
+----------------
+User-specific endpoints:
+- GET /api/user/profile - User profile retrieval
+- POST /api/user/profile - Profile updates
+- GET /api/user/history - User scan history
+- GET /api/user/guides - Seen guides tracking
+- POST /api/user/guides/{id} - Mark guide as seen
+
+================================================================================
+                              SERVICES DIRECTORY
+================================================================================
+Business logic and utility services.
+
+services/__init__.py
+--------------------
+Package initialization with exports.
+
+services/auth_service.py
+------------------------
+Authentication business logic:
+- User creation and password hashing (bcrypt)
+- JWT token generation and validation
+- Profile management (basic info and health profile)
+- Password reset functionality
+- Session management
+
+services/database_service.py
+----------------------------
+PostgreSQL database operations:
+- Connection pool management
+- User CRUD operations
+- Session (scan) storage and retrieval
+- Meal logging and queries
+- Nutrition goals management
+- Guide tracking
+
+services/session_service.py
+---------------------------
+In-memory session management:
+- Temporary session storage for active scans
+- Session retrieval and cleanup
+- Cache expiration handling
+
+services/health_calculator.py
+-----------------------------
+Health metrics calculations:
+- BMI calculation (calculate_bmi)
+- BMR using Mifflin-St Jeor equation (calculate_bmr)
+- TDEE calculation (calculate_tdee)
+- Daily calorie targets (calculate_daily_calories)
+- Macronutrient distribution (calculate_macro_targets)
+- Fiber and water intake recommendations
+- Health risk assessment
+- Complete health profile generation
+
+services/nutrition_service.py
+-----------------------------
+Nutrition data management:
+- USDA FoodData Central API integration
+- Nutrition data caching
+- Fallback nutrition values for common foods
+- Nutrition score calculation
+- Data normalization utilities
+
+================================================================================
+                            GPT_MODEL DIRECTORY
+================================================================================
+AI-powered services using Groq LLaMA API.
+
+gpt_model/__init__.py
+---------------------
+Package exports for all AI services.
+
+gpt_model/client.py
+-------------------
+Groq API client utilities:
+- Singleton client management (thread-safe)
+- Async and sync API call wrappers
+- JSON parsing utilities
+- Thread pool for concurrent requests
+- Error handling
+
+gpt_model/gptapi.py
+-------------------
+Main GPT API integration (legacy, still contains meal functions):
+- generate_meal_recommendations_from_ingredients() - Pakistani meal suggestions
+- generate_meal_suggestions_personal() - Personalized meal ideas
+- _fallback_meal_recommendations() - Offline meal suggestions
+- USDA-accurate nutrition value guidelines in prompts
+
+gpt_model/storage_service.py
+----------------------------
+Storage recommendation generation:
+- generate_storage_recommendations() - AI storage advice
+- _fallback_storage() - Heuristic-based fallback
+- Food-specific storage tips
+
+gpt_model/health_service.py
+---------------------------
+Health-related AI services:
+- generate_health_suggestions() - Health tips for foods
+- generate_consumption_recommendations() - Personalized consumption advice
+
+gpt_model/chat_service.py
+-------------------------
+Nutrition chatbot:
+- generate_chat_response() - Conversational AI
+- User profile integration
+- Chat history management
+- Personalized responses
+
+gpt_model/insights_service.py
+-----------------------------
+Health insights generation:
+- generate_personalized_insights() - Daily/weekly insights
+- Based on actual consumption data
+- Condition-aware recommendations
+
+gpt_model/goals_service.py
+--------------------------
+Nutrition goals generation:
+- generate_personalized_nutrition_goals() - AI-powered targets
+- _calculate_fallback_goals() - Scientific fallback calculation
+- Mifflin-St Jeor formula implementation
+
+================================================================================
+                              MODELS DIRECTORY
+================================================================================
+Machine learning models and inference.
+
+models/app.py
+-------------
+ML model loading and inference:
+- load_fruit_detection_model() - PyTorch fruit/vegetable classifier
+- load_freshness_model() - TensorFlow freshness detector
+- detect_fruit() - Food type classification (36 classes)
+- detect_freshness() - Fresh/stale prediction
+- Model path resolution and fallbacks
+
+models/models/fruit_detection/
+------------------------------
+HuggingFace fruit detection model files:
+- model.safetensors - Model weights
+- config.json - Model configuration
+- preprocessor_config.json - Image preprocessing config
+
+models/models/freshness_detection/
+----------------------------------
+TensorFlow freshness model:
+- freshness_model_converted.h5 - Primary freshness model
+- rottenvsfresh98pval.h5 - Alternative freshness model
+
+================================================================================
+                          USDA_FOODCENTRAL DIRECTORY
+================================================================================
+
+usda_foodcentral/usdaapi.py
+---------------------------
+USDA FoodData Central API client:
+- Food search by name
+- Nutrient data retrieval
+- Response parsing and normalization
+
+================================================================================
+                              DATA DIRECTORY
+================================================================================
+
+data/__init__.py
+----------------
+Data package initialization (currently empty, reserved for future use).
+
+================================================================================
+                            MIGRATIONS DIRECTORY
+================================================================================
+
+migrations/001_add_meal_tracking.sql
+------------------------------------
+Database migration for meal tracking feature:
+- Meal entries table
+- Nutrition tracking columns
+- Foreign key relationships
+
+================================================================================
+                          STATIC & TEMPLATES
+================================================================================
+
+static/monitor.js
+-----------------
+JavaScript for server monitoring dashboard.
+
+static/style.css
+----------------
+CSS styles for monitoring dashboard.
+
+templates/monitor.html
+----------------------
+HTML template for server health monitoring page.
+
+================================================================================
+                              UPLOADS DIRECTORY
+================================================================================
+
+uploads/
+--------
+Directory for user-uploaded food images.
+Images are stored with unique filenames (UUID-based).
+Served statically via /uploads/{filename} endpoint.
+
+================================================================================
+                            KEY FEATURES SUMMARY
+================================================================================
+
+1. FOOD ANALYSIS
+   - Dual ML model inference (fruit detection + freshness)
+   - USDA nutrition data integration
+   - AI-powered storage recommendations
+   - Minimum 60% confidence threshold for food detection
+
+2. USER AUTHENTICATION
+   - JWT-based authentication
+   - Minimum 8-character password requirement
+   - Health profile with AI-generated nutrition goals
+   - Secure password hashing with bcrypt
+
+3. UNLOGGED USER HANDLING
+   - Can scan foods without account
+   - Results show: food name, freshness, nutrition only
+   - Meal suggestions and consumption advice hidden
+   - Scan history NOT saved to database
+
+4. MEAL TRACKING
+   - Log meals with nutrition data
+   - Daily/weekly summaries
+   - Goals progress tracking
+   - AI meal recommendations with Pakistani cuisine focus
+
+5. AI INTEGRATION (Groq LLaMA 8B)
+   - Storage recommendations
+   - Health suggestions
+   - Consumption advice
+   - Personalized insights
+   - Nutrition chatbot
+   - Meal recommendations
+
+6. ACCURATE NUTRITION VALUES
+   - USDA-based nutrition data
+   - Realistic calorie estimates in AI prompts
+   - Scientific formula-based nutrition goals
+   - Mifflin-St Jeor equation for BMR/TDEE
+
+================================================================================
+                              END OF DOCUMENTATION
+================================================================================
+

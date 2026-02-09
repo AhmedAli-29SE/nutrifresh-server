@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriFresh - Live Monitor</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>NutriFresh Live Monitor</h1>
+    <div id="status">Connecting…</div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Live Events</h2>
+      <div class="controls">
+        <button id="pauseBtn">Pause</button>
+        <button id="resumeBtn">Resume</button>
+        <button id="clearBtn">Clear</button>
+        <input id="filter" placeholder="Filter (e.g. error, response)" />
+      </div>
+      <ul id="events"></ul>
+    </section>
+
+    <section class="panel side">
+      <h2>Summary</h2>
+      <div class="summary" id="summary">
+        <div>Requests: <span id="reqCount">0</span></div>
+        <div>Responses: <span id="respCount">0</span></div>
+        <div>Errors: <span id="errCount">0</span></div>
+      </div>
+
+      <h3>Recent Sessions</h3>
+      <ul id="sessions"></ul>
+    </section>
+  </main>
+
+  <script src="/static/monitor.js"></script>
+</body>
+</html>

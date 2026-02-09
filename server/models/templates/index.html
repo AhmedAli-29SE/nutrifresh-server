@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit & Vegetable AI Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🍎 Smart Produce Analyzer 🥬</h1>
+                <p class="subtitle">AI-Powered Fruit & Vegetable Detection with Freshness Analysis</p>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Mode Selection -->
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="upload">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Upload Image
+                </button>
+                <button class="mode-btn" data-mode="webcam">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    Use Webcam
+                </button>
+            </div>
+
+            <!-- Upload Mode -->
+            <div class="upload-section mode-content active" id="upload-mode">
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p class="upload-text">Click to upload or drag and drop</p>
+                        <p class="upload-subtext">PNG, JPG, JPEG up to 16MB</p>
+                    </div>
+                </div>
+                
+                <div class="preview-section" id="preview-section" style="display: none;">
+                    <div class="image-preview-container">
+                        <img id="preview-image" src="" alt="Preview">
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" id="remove-image">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Remove
+                        </button>
+                        <button class="btn btn-primary" id="analyze-upload">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            Analyze Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webcam Mode -->
+            <div class="webcam-section mode-content" id="webcam-mode">
+                <div class="webcam-container">
+                    <video id="webcam" autoplay playsinline></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <img id="captured-image" src="" alt="Captured" style="display: none;">
+                </div>
+                
+                <div class="webcam-controls">
+                    <button class="btn btn-primary" id="start-webcam">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                        </svg>
+                        Start Webcam
+                    </button>
+                    <button class="btn btn-primary" id="capture-btn" style="display: none;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        Capture Photo
+                    </button>
+                    <button class="btn btn-secondary" id="retake-btn" style="display: none;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Retake
+                    </button>
+                    <button class="btn btn-primary" id="analyze-webcam" style="display: none;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        Analyze Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results-section" style="display: none;">
+                <div class="results-card">
+                    <div class="results-header">
+                        <h2>Analysis Results</h2>
+                        <span class="freshness-badge" id="freshness-badge"></span>
+                    </div>
+                    
+                    <div class="result-grid">
+                        <div class="result-card primary-card">
+                            <div class="card-icon fruit-icon">🍎</div>
+                            <div class="card-content">
+                                <span class="card-label">Detected Item</span>
+                                <span class="card-value" id="fruit-name">-</span>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="fruit-confidence-bar"></div>
+                                </div>
+                                <span class="confidence-text" id="fruit-confidence">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="result-card primary-card">
+                            <div class="card-icon freshness-icon" id="freshness-emoji">🟢</div>
+                            <div class="card-content">
+                                <span class="card-label">Freshness Status</span>
+                                <span class="card-value" id="freshness-status">-</span>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="freshness-confidence-bar"></div>
+                                </div>
+                                <span class="confidence-text" id="freshness-confidence">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top 5 Predictions -->
+                    <div class="top-predictions-box">
+                        <h3 class="predictions-title">🎯 Top 5 Possible Detections</h3>
+                        <div class="predictions-list" id="top-5-predictions">
+                            <!-- Top 5 predictions will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div class="detailed-info">
+                        <div class="info-item">
+                            <span class="info-label">Prediction Value:</span>
+                            <span class="info-value" id="prediction-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Analysis Date:</span>
+                            <span class="info-value" id="analysis-date">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-box" id="recommendation-box">
+                        <div class="recommendation-icon">💡</div>
+                        <div class="recommendation-content">
+                            <h3>Recommendation</h3>
+                            <p id="recommendation-text">-</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary btn-full" id="analyze-another">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        Analyze Another
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                    <div class="loading-stages">
+                        <p class="loading-text active" id="loading-text-1">🔍 Detecting fruit/vegetable...</p>
+                        <p class="loading-text" id="loading-text-2">🧪 Analyzing freshness...</p>
+                        <p class="loading-text" id="loading-text-3">✨ Preparing results...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="error-message" style="display: none;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p id="error-text"></p>
+                <button class="btn btn-secondary btn-small" onclick="hideError()">Dismiss</button>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <p class="footer-text">
+                    <span class="footer-badge">AI-Powered</span>
+                    Fruit Detection (ResNet-50) + Freshness Analysis (MobileNetV2)
+                </p>
+                <p class="footer-subtext">Built with TensorFlow, PyTorch & Flask</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
